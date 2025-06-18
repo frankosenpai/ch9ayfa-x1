@@ -6,18 +6,17 @@ app = FastAPI()
 API_KEY = "ch9ayfa"
 
 @app.get("/outfit-image")
-def outfit_image(uid: str = Query(...), region: str = Query(...), key: str = Query(None)):
+def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query(None)):
     if key != API_KEY:
         raise HTTPException(status_code=403, detail="Invalid API key")
 
-    external_url = f"https://aditya-outfit-v6op.onrender.com/outfit-image?uid={uid}&region={region}"
+    url = f"https://aditya-outfit-v6op.onrender.com/outfit-image?uid={uid}&region={region}"
 
     try:
-        response = requests.get(external_url, timeout=15)
-        if response.status_code == 200 and response.headers.get("content-type", "").startswith("image"):
-            return Response(content=response.content, media_type=response.headers["content-type"])
+        res = requests.get(url, timeout=10)
+        if res.status_code == 200 and res.headers.get("content-type", "").startswith("image"):
+            return Response(content=res.content, media_type=res.headers["content-type"])
         else:
-            raise HTTPException(status_code=502, detail="Failed to fetch image from source")
+            raise HTTPException(status_code=400, detail="Image not found or invalid response")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=str(e))
