@@ -3,7 +3,7 @@ import requests
 
 app = FastAPI()
 
-API_KEY = "ch9ayfa"  # المفتاح ديالك
+API_KEY = "ch9ayfa"
 
 @app.get("/outfit-image")
 def get_outfit_image(
@@ -25,4 +25,3 @@ def get_outfit_image(
 
     except Exception as e:
         return {"error": f"❌ Exception: {str(e)}"}
-
