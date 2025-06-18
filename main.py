@@ -3,7 +3,7 @@ import requests
 
 app = FastAPI()
 
-API_KEY = "ch9ayfa"  # المفتاح السري
+API_KEY = "ch9ayfa"  # المفتاح ديالك
 
 @app.get("/outfit-image")
 def get_outfit_image(
@@ -21,7 +21,8 @@ def get_outfit_image(
         if r.status_code == 200:
             return Response(content=r.content, media_type="image/png")
         else:
-            return {"error": f"❌ Failed to fetch image. Status code: {r.status_code}"}
+            return {"error": f"❌ Failed. Code: {r.status_code}"}
 
     except Exception as e:
         return {"error": f"❌ Exception: {str(e)}"}
+
