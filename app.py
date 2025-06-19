@@ -13,9 +13,7 @@ def create_fire_glow(image, border=40):
     base = Image.new("RGBA", (new_width, new_height), (0, 0, 0, 0))
     base.paste(image, (border, border))
 
-    glow = base.copy()
-    glow = glow.convert("L")
-    glow = glow.convert("RGBA")
+    glow = base.convert("L").convert("RGBA")
 
     r, g, b, a = glow.split()
     r = r.point(lambda i: min(255, int(i * 3)))
@@ -23,7 +21,7 @@ def create_fire_glow(image, border=40):
     b = b.point(lambda i: int(i * 0.1))
     glow_colored = Image.merge("RGBA", (r, g, b, a))
 
-    glow_blurred = glow_colored.filter(ImageFilter.GaussianBlur(radius=30))
+    glow_blurred = glow_colored.filter(ImageFilter.GaussianBlur(radius=20))
     result = Image.alpha_composite(glow_blurred, base)
     return result
 
@@ -35,20 +33,19 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
     url = f"https://aditya-outfit-v6op.onrender.com/outfit-image?uid={uid}&region={region}"
 
     try:
-        res = requests.get(url, timeout=20)
+        res = requests.get(url, timeout=10)
         if res.status_code != 200 or not res.headers.get("content-type", "").startswith("image"):
             raise HTTPException(status_code=400, detail="Image not found or invalid response")
 
         original = Image.open(BytesIO(res.content)).convert("RGBA")
 
-        border = 40
-        fire_img = create_fire_glow(original, border=border)
+        fire_img = create_fire_glow(original, border=40)
 
         text = "@CH9AYFAX1"
         try:
-            font = ImageFont.truetype("arial.ttf", 40)
-        except:
             font = ImageFont.load_default()
+        except Exception:
+            font = None
 
         text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
@@ -58,7 +55,6 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         text_height = bbox[3] - bbox[1]
 
         margin = 10
-
         x = margin
         y = margin
 
@@ -78,3 +74,4 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
