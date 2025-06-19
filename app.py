@@ -42,24 +42,20 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
         fire_img = create_fire_glow(original, border=40)
 
-        # نوجد طبقة شفافة للنص بحجم نفس الصورة
         text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
         text = "@CH9AYFAX1"
 
+        # إذا عندك خط خارجي، استعمل المسار الكامل لهنا
         try:
-            font = ImageFont.truetype("arial.ttf", 40)
+            font = ImageFont.truetype("arial.ttf", 80)  # حجم كبير 80
         except:
             font = ImageFont.load_default()
 
         x, y = 20, 20
-
-        # نرسم النص بلون أبيض لكنه شفاف (مثلا أوباسيتي 120 من 255)
-        text_color = (255, 255, 255, 120)  # 120 = نصف شفافية تقريباً
-
+        text_color = (255, 255, 255, 120)  # نص نصف شفاف
         draw.text((x, y), text, font=font, fill=text_color)
 
-        # ندمج طبقة النص مع الصورة الأصلية
         final_img = Image.alpha_composite(fire_img, text_layer)
 
         output = BytesIO()
