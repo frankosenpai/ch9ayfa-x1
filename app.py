@@ -40,24 +40,27 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
         fire_img = create_fire_glow(original, border=40)
 
+        # نحدد حجم الخط بناءً على عرض الصورة (مثلاً 10% من العرض)
+        font_size = max(40, int(fire_img.width * 0.1))
+
+        try:
+            font = ImageFont.truetype("arial.ttf", font_size)
+        except:
+            font = ImageFont.load_default()
+
         text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
         text = "@CH9AYFAX1"
 
-        try:
-            font = ImageFont.truetype("arial.ttf", 140)
-        except:
-            font = ImageFont.load_default()
-
+        # تحديد إحداثيات النص (20 بكسل من الأعلى واليسار)
         x, y = 20, 20
 
-        # ظل للنص (أسود شبه شفاف)
+        # ظل للنص
         shadow_color = (0, 0, 0, 180)
-        # نرسم الظل بخفة بجانب النص (1 بكسل يمين + 1 بكسل أسفل)
-        draw.text((x+2, y+2), text, font=font, fill=shadow_color)
+        draw.text((x + 3, y + 3), text, font=font, fill=shadow_color)
 
-        # النص باللون الأبيض مع أوباسيتي أقوى (200 من 255)
-        text_color = (255, 255, 255, 200)
+        # نص أبيض شبه شفاف
+        text_color = (255, 255, 255, 220)
         draw.text((x, y), text, font=font, fill=text_color)
 
         final_img = Image.alpha_composite(fire_img, text_layer)
@@ -70,6 +73,5 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
