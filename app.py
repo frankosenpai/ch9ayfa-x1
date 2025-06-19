@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query, HTTPException, Response
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import requests
 from io import BytesIO
+import os
 
 app = FastAPI()
 
@@ -41,10 +42,12 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         fire_img = create_fire_glow(original, border=30)
 
         text = "@CH9AYFAX1"
+        font_path = os.path.join(os.path.dirname(__file__), "fonts", "Roboto-Regular.ttf")
         try:
+            font = ImageFont.truetype(font_path, 60)  # حجم الخط كبير
+        except Exception as e:
+            print(f"Font loading failed: {e}")
             font = ImageFont.load_default()
-        except:
-            font = None
 
         text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
