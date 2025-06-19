@@ -2,7 +2,6 @@ from fastapi import FastAPI, Query, HTTPException, Response
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import requests
 from io import BytesIO
-import os
 
 app = FastAPI()
 
@@ -14,8 +13,7 @@ def create_fire_glow(image, border=40):
     base = Image.new("RGBA", (new_width, new_height), (0, 0, 0, 0))
     base.paste(image, (border, border))
 
-    glow = base.copy()
-    glow = glow.convert("L").convert("RGBA")
+    glow = base.convert("L").convert("RGBA")
     r, g, b, a = glow.split()
     r = r.point(lambda i: min(255, int(i * 3)))
     g = g.point(lambda i: min(255, int(i * 1.5)))
@@ -46,14 +44,20 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         draw = ImageDraw.Draw(text_layer)
         text = "@CH9AYFAX1"
 
-        # إذا عندك خط خارجي، استعمل المسار الكامل لهنا
         try:
-            font = ImageFont.truetype("arial.ttf", 80)  # حجم كبير 80
+            font = ImageFont.truetype("arial.ttf", 140)
         except:
             font = ImageFont.load_default()
 
         x, y = 20, 20
-        text_color = (255, 255, 255, 120)  # نص نصف شفاف
+
+        # ظل للنص (أسود شبه شفاف)
+        shadow_color = (0, 0, 0, 180)
+        # نرسم الظل بخفة بجانب النص (1 بكسل يمين + 1 بكسل أسفل)
+        draw.text((x+2, y+2), text, font=font, fill=shadow_color)
+
+        # النص باللون الأبيض مع أوباسيتي أقوى (200 من 255)
+        text_color = (255, 255, 255, 200)
         draw.text((x, y), text, font=font, fill=text_color)
 
         final_img = Image.alpha_composite(fire_img, text_layer)
@@ -66,5 +70,6 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
