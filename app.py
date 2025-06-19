@@ -35,23 +35,23 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
     try:
         res = requests.get(url, timeout=20)
         if res.status_code != 200 or not res.headers.get("content-type", "").startswith("image"):
-            raise HTTPException(status_code=400, detail="Image not found or invalid response")
-
-        original = Image.open(BytesIO(res.content)).convert("RGBA")
-
-        fire_img = create_fire_glow(original, border=40)
+            blank = Image.new("RGBA", (512, 512), (255, 255, 255, 255))
+            fire_img = create_fire_glow(blank, border=40)
+        else:
+            original = Image.open(BytesIO(res.content)).convert("RGBA")
+            fire_img = create_fire_glow(original, border=40)
 
         text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
         text = "@CH9AYFAX1"
 
         try:
-            font = ImageFont.truetype("arial.ttf", 50)  # زدت الحجم هنا
+            font = ImageFont.truetype("arial.ttf", 50)
         except:
             font = ImageFont.load_default()
 
         x, y = 20, 20
-        text_color = (255, 255, 255, 180)  # شفافية أقل باش تبان مزيان
+        text_color = (255, 255, 255, 180)
         draw.text((x, y), text, font=font, fill=text_color)
 
         final_img = Image.alpha_composite(fire_img, text_layer)
@@ -65,9 +65,6 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
 
 
 
