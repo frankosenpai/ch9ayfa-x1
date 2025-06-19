@@ -8,18 +8,13 @@ app = FastAPI()
 API_KEY = "ch9ayfa"
 
 def create_fire_glow(image, border=40):
-    # نزيد إطار شفاف حول الصورة
     new_width = image.width + border * 2
     new_height = image.height + border * 2
+    base = Image.new("RGBA", (new_width, new_height), (0, 0, 0, 0))
+    base.paste(image, (border, border))
 
-    # نخلق خلفية بيضاء قبل اللصق
-    background = Image.new("RGBA", (new_width, new_height), (255, 255, 255, 255))
-
-    # نلصق الصورة الأصلية فوق الخلفية البيضاء
-    background.paste(image, (border, border), mask=image)
-
-    # نشتغل على الخلفية المدموجة
-    glow = background.convert("L").convert("RGBA")
+    glow = base.copy()
+    glow = glow.convert("L").convert("RGBA")
     r, g, b, a = glow.split()
     r = r.point(lambda i: min(255, int(i * 3)))
     g = g.point(lambda i: min(255, int(i * 1.5)))
@@ -27,11 +22,11 @@ def create_fire_glow(image, border=40):
     glow_colored = Image.merge("RGBA", (r, g, b, a))
 
     glow_blurred = glow_colored.filter(ImageFilter.GaussianBlur(radius=30))
-    result = Image.alpha_composite(glow_blurred, background)
+    result = Image.alpha_composite(glow_blurred, base)
     return result
 
 @app.get("/outfit-image")
-async def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query(None)):
+def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query(None)):
     if key != API_KEY:
         raise HTTPException(status_code=403, detail="Invalid API key")
 
@@ -39,29 +34,24 @@ async def get_outfit(uid: str = Query(...), region: str = Query(...), key: str =
 
     try:
         res = requests.get(url, timeout=20)
-
         if res.status_code != 200 or not res.headers.get("content-type", "").startswith("image"):
-            blank = Image.new("RGBA", (512, 512), (255, 255, 255, 255))
-            fire_img = create_fire_glow(blank, border=40)
-        else:
-            original = Image.open(BytesIO(res.content)).convert("RGBA")
-            fire_img = create_fire_glow(original, border=40)
+            raise HTTPException(status_code=400, detail="Image not found or invalid response")
 
-        font_size = max(40, int(fire_img.width * 0.1))
-        try:
-            font = ImageFont.truetype("arial.ttf", font_size)
-        except:
-            font = ImageFont.load_default()
+        original = Image.open(BytesIO(res.content)).convert("RGBA")
+
+        fire_img = create_fire_glow(original, border=40)
 
         text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
         text = "@CH9AYFAX1"
+
+        try:
+            font = ImageFont.truetype("arial.ttf", 50)  # زدت الحجم هنا
+        except:
+            font = ImageFont.load_default()
+
         x, y = 20, 20
-
-        shadow_color = (0, 0, 0, 180)
-        draw.text((x + 3, y + 3), text, font=font, fill=shadow_color)
-
-        text_color = (255, 255, 255, 220)
+        text_color = (255, 255, 255, 180)  # شفافية أقل باش تبان مزيان
         draw.text((x, y), text, font=font, fill=text_color)
 
         final_img = Image.alpha_composite(fire_img, text_layer)
@@ -74,6 +64,10 @@ async def get_outfit(uid: str = Query(...), region: str = Query(...), key: str =
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
 
 
 
