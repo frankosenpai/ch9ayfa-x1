@@ -8,12 +8,18 @@ app = FastAPI()
 API_KEY = "ch9ayfa"
 
 def create_fire_glow(image, border=40):
+    # نزيد إطار شفاف حول الصورة
     new_width = image.width + border * 2
     new_height = image.height + border * 2
-    base = Image.new("RGBA", (new_width, new_height), (0, 0, 0, 0))
-    base.paste(image, (border, border))
 
-    glow = base.convert("L").convert("RGBA")
+    # نخلق خلفية بيضاء قبل اللصق
+    background = Image.new("RGBA", (new_width, new_height), (255, 255, 255, 255))
+
+    # نلصق الصورة الأصلية فوق الخلفية البيضاء
+    background.paste(image, (border, border), mask=image)
+
+    # نشتغل على الخلفية المدموجة
+    glow = background.convert("L").convert("RGBA")
     r, g, b, a = glow.split()
     r = r.point(lambda i: min(255, int(i * 3)))
     g = g.point(lambda i: min(255, int(i * 1.5)))
@@ -21,7 +27,7 @@ def create_fire_glow(image, border=40):
     glow_colored = Image.merge("RGBA", (r, g, b, a))
 
     glow_blurred = glow_colored.filter(ImageFilter.GaussianBlur(radius=30))
-    result = Image.alpha_composite(glow_blurred, base)
+    result = Image.alpha_composite(glow_blurred, background)
     return result
 
 @app.get("/outfit-image")
@@ -35,8 +41,7 @@ async def get_outfit(uid: str = Query(...), region: str = Query(...), key: str =
         res = requests.get(url, timeout=20)
 
         if res.status_code != 200 or not res.headers.get("content-type", "").startswith("image"):
-            # إذا الصورة ما جاتش، نصنع صورة فارغة مع تأثير التوهج
-            blank = Image.new("RGBA", (512, 512), (0, 0, 0, 255))
+            blank = Image.new("RGBA", (512, 512), (255, 255, 255, 255))
             fire_img = create_fire_glow(blank, border=40)
         else:
             original = Image.open(BytesIO(res.content)).convert("RGBA")
@@ -53,11 +58,9 @@ async def get_outfit(uid: str = Query(...), region: str = Query(...), key: str =
         text = "@CH9AYFAX1"
         x, y = 20, 20
 
-        # ظل النص
         shadow_color = (0, 0, 0, 180)
         draw.text((x + 3, y + 3), text, font=font, fill=shadow_color)
 
-        # النص الأبيض
         text_color = (255, 255, 255, 220)
         draw.text((x, y), text, font=font, fill=text_color)
 
@@ -71,5 +74,6 @@ async def get_outfit(uid: str = Query(...), region: str = Query(...), key: str =
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
