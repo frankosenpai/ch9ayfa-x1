@@ -41,30 +41,38 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
         fire_img = create_fire_glow(original, border=40)
 
-        text = "@tmgx_kira"
-
-        text_layer = Image.new("RGBA", fire_img.size, (0, 0, 0, 0))
+        # إنشاء صورة كبيرة للرسم عليها النص (4000x4000)
+        text_layer = Image.new("RGBA", (4000, 4000), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
 
+        text = "@tmgx_kira"
+
         try:
-            font = ImageFont.truetype("arial.ttf", 100000000000000)  # حجم ضخم جداً
-        except:
+            font = ImageFont.truetype("Roboto-Bold.ttf", 1000)  # حجم كبير مع خط محلي
+        except Exception as e:
             font = ImageFont.load_default()
 
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        x, y = 20, 20  # فوق على اليسار بمسافة 20px
+        # موقع النص فالأعلى على اليسار بمسافة 50 بيكسل
+        x, y = 50, 50
 
+        # ظل للنص
         shadow_color = (0, 0, 0, 200)
-        for offset in [(2, 2), (2, -2), (-2, 2), (-2, -2)]:
+        for offset in [(5, 5), (5, -5), (-5, 5), (-5, -5)]:
             draw.text((x + offset[0], y + offset[1]), text, font=font, fill=shadow_color)
 
+        # النص الأبيض
         text_color = (255, 255, 255, 255)
         draw.text((x, y), text, font=font, fill=text_color)
 
-        final_img = Image.alpha_composite(fire_img, text_layer)
+        # تصغير صورة النص لتتناسب مع صورة الأصلية
+        text_layer_resized = text_layer.resize(fire_img.size, Image.ANTIALIAS)
+
+        # دمج النص مع الصورة النهائية
+        final_img = Image.alpha_composite(fire_img, text_layer_resized)
 
         output = BytesIO()
         final_img.save(output, format="PNG")
