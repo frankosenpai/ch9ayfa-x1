@@ -47,7 +47,7 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         draw = ImageDraw.Draw(text_layer)
 
         try:
-            font = ImageFont.truetype("arial.ttf", 1000)  # حجم ضخم جداً
+            font = ImageFont.truetype("arial.ttf", 100000000000000)  # حجم ضخم جداً
         except:
             font = ImageFont.load_default()
 
