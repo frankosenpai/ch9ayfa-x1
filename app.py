@@ -47,18 +47,18 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         draw = ImageDraw.Draw(text_layer)
 
         try:
-            font = ImageFont.truetype("arial.ttf", 180)
+            font = ImageFont.truetype("arial.ttf", 1000)  # حجم ضخم جداً
         except:
             font = ImageFont.load_default()
 
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
-        x = (fire_img.width - text_width) // 2
-        y = fire_img.height - text_height - 50
+
+        x, y = 20, 20  # فوق على اليسار بمسافة 20px
 
         shadow_color = (0, 0, 0, 200)
-        for offset in [(2,2), (2,-2), (-2,2), (-2,-2)]:
+        for offset in [(2, 2), (2, -2), (-2, 2), (-2, -2)]:
             draw.text((x + offset[0], y + offset[1]), text, font=font, fill=shadow_color)
 
         text_color = (255, 255, 255, 255)
