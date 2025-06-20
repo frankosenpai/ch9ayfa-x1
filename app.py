@@ -5,7 +5,7 @@ from io import BytesIO
 
 app = FastAPI()
 
-API_KEY = "ch9ayfa"
+API_KEY = "kera"
 
 def create_fire_glow(image, border=40):
     new_width = image.width + border * 2
