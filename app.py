@@ -47,21 +47,21 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         draw = ImageDraw.Draw(text_layer)
 
         try:
-            font = ImageFont.truetype("arial.ttf", 180)  # حجم كبير بزاف
+            font = ImageFont.truetype("arial.ttf", 180)
         except:
             font = ImageFont.load_default()
 
-        # حساب حجم النص باش يكون فوسط الصورة عرضياً
-        text_width, text_height = draw.textsize(text, font=font)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
         x = (fire_img.width - text_width) // 2
-        y = fire_img.height - text_height - 50  # 50 بيكسل من الأسفل، ممكن تعدل حسب الرغبة
+        y = fire_img.height - text_height - 50
 
         shadow_color = (0, 0, 0, 200)
-        # رسم ظل للنص لتحسين الوضوح
         for offset in [(2,2), (2,-2), (-2,2), (-2,-2)]:
             draw.text((x + offset[0], y + offset[1]), text, font=font, fill=shadow_color)
 
-        text_color = (255, 255, 255, 255)  # أبيض ناصع بدون شفافية
+        text_color = (255, 255, 255, 255)
         draw.text((x, y), text, font=font, fill=text_color)
 
         final_img = Image.alpha_composite(fire_img, text_layer)
@@ -74,7 +74,6 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 
