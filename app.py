@@ -41,14 +41,13 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
 
         fire_img = create_fire_glow(original, border=40)
 
-        # إنشاء صورة كبيرة للرسم عليها النص (4000x4000)
         text_layer = Image.new("RGBA", (4000, 4000), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
 
         text = "@tmgx_kira"
 
         try:
-            font = ImageFont.truetype("Roboto-Bold.ttf", 1000)  # حجم كبير مع خط محلي
+            font = ImageFont.truetype("Roboto-Bold.ttf", 1000)
         except Exception as e:
             font = ImageFont.load_default()
 
@@ -56,22 +55,17 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        # موقع النص فالأعلى على اليسار بمسافة 50 بيكسل
         x, y = 50, 50
 
-        # ظل للنص
         shadow_color = (0, 0, 0, 200)
         for offset in [(5, 5), (5, -5), (-5, 5), (-5, -5)]:
             draw.text((x + offset[0], y + offset[1]), text, font=font, fill=shadow_color)
 
-        # النص الأبيض
         text_color = (255, 255, 255, 255)
         draw.text((x, y), text, font=font, fill=text_color)
 
-        # تصغير صورة النص لتتناسب مع صورة الأصلية
-        text_layer_resized = text_layer.resize(fire_img.size, Image.ANTIALIAS)
+        text_layer_resized = text_layer.resize(fire_img.size, Image.Resampling.LANCZOS)
 
-        # دمج النص مع الصورة النهائية
         final_img = Image.alpha_composite(fire_img, text_layer_resized)
 
         output = BytesIO()
