@@ -47,12 +47,21 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         draw = ImageDraw.Draw(text_layer)
 
         try:
-            font = ImageFont.truetype("arial.ttf", 40)
+            font = ImageFont.truetype("arial.ttf", 180)  # حجم كبير بزاف
         except:
             font = ImageFont.load_default()
 
-        x, y = 20, 20
-        text_color = (255, 255, 255, 230)  # أبيض ناصع مع شفافية خفيفة
+        # حساب حجم النص باش يكون فوسط الصورة عرضياً
+        text_width, text_height = draw.textsize(text, font=font)
+        x = (fire_img.width - text_width) // 2
+        y = fire_img.height - text_height - 50  # 50 بيكسل من الأسفل، ممكن تعدل حسب الرغبة
+
+        shadow_color = (0, 0, 0, 200)
+        # رسم ظل للنص لتحسين الوضوح
+        for offset in [(2,2), (2,-2), (-2,2), (-2,-2)]:
+            draw.text((x + offset[0], y + offset[1]), text, font=font, fill=shadow_color)
+
+        text_color = (255, 255, 255, 255)  # أبيض ناصع بدون شفافية
         draw.text((x, y), text, font=font, fill=text_color)
 
         final_img = Image.alpha_composite(fire_img, text_layer)
