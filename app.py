@@ -5,7 +5,7 @@ from io import BytesIO
 
 app = FastAPI()
 
-API_KEY = "ch9ayfa"
+API_KEY = "FranKo-7up"
 
 def create_fire_glow(image, border=40):
     new_width = image.width + border * 2
@@ -44,7 +44,7 @@ def get_outfit(uid: str = Query(...), region: str = Query(...), key: str = Query
         text_layer = Image.new("RGBA", (4000, 4000), (0, 0, 0, 0))
         draw = ImageDraw.Draw(text_layer)
 
-        text = "@tmgx_kira"
+        text = "@M_DD_F"
 
         try:
             font = ImageFont.truetype("Roboto-Bold.ttf", 1000)
