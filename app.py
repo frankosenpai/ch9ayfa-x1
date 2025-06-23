@@ -6,6 +6,20 @@ from io import BytesIO
 app = FastAPI()
 
 API_KEY = "FranKo-7up"
+API_KEY = "franko_ff"
+API_KEY = "community"
+API_KEY = "KiraDevX"
+API_KEY = "3MKK"
+API_KEY = "ByFranKo"
+API_KEY = "AKAJI-TEAM"
+API_KEY = "ANY-TEAM"
+API_KEY = "FRANKOOO"
+API_KEY = "Rou7"
+API_KEY = "FrankoDevG"
+API_KEY = "LbrenesDevX"
+API_KEY = "Flgwldyy"
+API_KEY = "TalyeniHere"
+API_KEY = "PiRate-Modz"
 
 def create_fire_glow(image, border=40):
     new_width = image.width + border * 2
